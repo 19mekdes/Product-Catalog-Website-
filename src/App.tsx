@@ -1,11 +1,16 @@
-
+import { useState } from "react";
+import Navbar from "./components/Navbar";
+import Home from "./pages/Home";
 
 function App() {
+  const [searchTerm, setSearchTerm] = useState("");
+
   return (
-    <h1 className="text-3xl font-bold underline bg-amber-100">
-    Hello world!
-  </h1>
-  )
+    <div>
+      <Navbar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+      <Home searchTerm={searchTerm} />
+    </div>
+  );
 }
 
-export default App
+export default App;
