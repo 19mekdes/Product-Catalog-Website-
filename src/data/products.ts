@@ -1,4 +1,3 @@
-
 import type { Product } from "../types";
 
 export const products: Product[] = [
@@ -107,30 +106,45 @@ export const products: Product[] = [
     name: "Laptop",
     price: 1200,
     category: "Electronics",
-    rating: 4.5,
-    image: "/image/Laptop.jpg",
+    rating: 4.9,
+    image: "/image/laptop.jpg",
     description: "High performance laptop.",
     inStock: true,
     title: undefined,
   },
-  
   {
     id: 10,
     name: "Smartphone",
-    price: 800,
+    price: 898.99,
     category: "Electronics",
     rating: 4.7,
-    image: "/image/Smartphone.jpg",
-    description: "Latest generation smartphone.",
+    image: "/image/phone.jpg",
+    description: "Latest smartphone with advanced camera and long battery life.",
     inStock: true,
     title: undefined,
-  }
-];
-
-
-
-
-
-
+  },
+  {
+    id: 11,
+    name: "Womanshoes",
+    price: 87.99,
+    category: "Footwear",
+    rating: 4.7,
+    image: "/image/womanshoes.jpg",
+    description: "Comfortable and stylish women's shoes.",
+    inStock: true,
+    title: undefined,
+  },
+   {
+    id: 12,
+    name: "Refrigerator",
+    price: 899.99,
+    category: "Home",
+    rating: 4.7,
+    image: "/image/refrigerator.jpg",
+    description: "Energy-efficient refrigerator with modern design.",
+    inStock: true,
+    title: undefined,
+  },
 
   
+];
