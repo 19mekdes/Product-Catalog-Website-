@@ -1,15 +1,29 @@
-import { useState } from "react";
-import Navbar from "./components/Navbar";
-import Home from "./pages/HomePage";
+
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { CartProvider } from './context/CartContext';
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import HomePage from './pages/HomePage';
+import ProductsPage from './pages/ProductsPage'; 
+import ProductDetailsPage from './pages/ProductDetailsPage';
 
 function App() {
-  const [searchTerm, setSearchTerm] = useState("");
-
   return (
-    <div>
-      <Navbar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-      <Home searchTerm={searchTerm} />
-    </div>
+    <Router>
+      <CartProvider>
+        <div className="min-h-screen bg-gray-50 flex flex-col">
+          <Navbar />
+          <main className="grow">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/products" element={<ProductsPage />} /> 
+              <Route path="/product/:id" element={<ProductDetailsPage />} />
+            </Routes>
+          </main>
+          <Footer />
+        </div>
+      </CartProvider>
+    </Router>
   );
 }
 
