@@ -41,6 +41,16 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
+  //  Check if all items in cart are in stock
+  const areAllItemsInStock = () => {
+    return cart.every(item => item.inStock === true);
+  };
+
+  //  Get out of stock items
+  const getOutOfStockItems = () => {
+    return cart.filter(item => !item.inStock);
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -87,11 +97,24 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
   };
 
   const handleCheckout = () => {
+    //  CRITICAL FIX: Check stock before proceeding to checkout
+    if (!areAllItemsInStock()) {
+      const outOfStockItems = getOutOfStockItems();
+      alert(`❌ Cannot proceed to checkout. The following items are out of stock:\n\n${outOfStockItems.map(item => `• ${item.name}`).join('\n')}\n\nPlease remove them from your cart.`);
+      return; // Don't proceed to checkout
+    }
+    
     setCheckoutStep('checkout');
   };
 
   const handlePlaceOrder = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    //  Double-check stock before placing order
+    if (!areAllItemsInStock()) {
+      alert('❌ Some items in your cart are no longer in stock. Please go back and remove them.');
+      return;
+    }
     
     if (validateForm()) {
       setIsProcessing(true);
@@ -148,80 +171,132 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
     return v;
   };
 
-  const renderCartView = () => (
-    <>
-      <div className="flex-1 overflow-y-auto p-4">
-        {cart.length === 0 ? (
-          <div className="text-center py-8">
-            <ShoppingCart className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500">Your cart is empty</p>
-            <button
-              onClick={onClose}
-              className="mt-4 text-blue-600 hover:underline"
-            >
-              Continue Shopping
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {cart.map(item => (
-              <div key={item.id} className="flex gap-4 border-b pb-4">
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-20 h-20 object-cover rounded"
-                />
-                <div className="flex-1">
-                  <h3 className="font-medium">{item.name}</h3>
-                  <p className="text-sm text-gray-600">${item.price.toFixed(2)}</p>
-                  
-                  <div className="flex items-center gap-2 mt-2">
-                    <button
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                      className="p-1 hover:bg-gray-100 rounded"
-                    >
-                      <Minus className="w-4 h-4" />
-                    </button>
-                    <span className="w-8 text-center">{item.quantity}</span>
-                    <button
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      className="p-1 hover:bg-gray-100 rounded"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => removeFromCart(item.id)}
-                      className="ml-auto text-red-600 text-sm hover:underline"
-                    >
-                      Remove
-                    </button>
+  const renderCartView = () => {
+    const hasOutOfStockItems = !areAllItemsInStock();
+    const outOfStockItems = getOutOfStockItems();
+
+    return (
+      <>
+        <div className="flex-1 overflow-y-auto p-4">
+          {cart.length === 0 ? (
+            <div className="text-center py-8">
+              <ShoppingCart className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-500">Your cart is empty</p>
+              <button
+                onClick={onClose}
+                className="mt-4 text-blue-600 hover:underline"
+              >
+                Continue Shopping
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {/*  Show warning if there are out of stock items */}
+              {hasOutOfStockItems && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                  <p className="text-sm font-semibold text-red-700 mb-2">
+                    ⚠️ Out of Stock Items:
+                  </p>
+                  {outOfStockItems.map(item => (
+                    <p key={item.id} className="text-xs text-red-600 ml-2">
+                      • {item.name}
+                    </p>
+                  ))}
+                  <p className="text-xs text-red-700 mt-2">
+                    Please remove these items to continue checkout.
+                  </p>
+                </div>
+              )}
+
+              {cart.map(item => (
+                <div 
+                  key={item.id} 
+                  className={`flex gap-4 border-b pb-4 ${
+                    !item.inStock ? 'opacity-50 bg-red-50 p-2 rounded' : ''
+                  }`}
+                >
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-20 h-20 object-cover rounded"
+                  />
+                  <div className="flex-1">
+                    <h3 className="font-medium">{item.name}</h3>
+                    <p className="text-sm text-gray-600">${item.price.toFixed(2)}</p>
+                    
+                    {/* Show out of stock badge */}
+                    {!item.inStock && (
+                      <span className="inline-block bg-red-100 text-red-800 text-xs font-semibold px-2 py-1 rounded mt-1">
+                        OUT OF STOCK
+                      </span>
+                    )}
+                    
+                    <div className="flex items-center gap-2 mt-2">
+                      <button
+                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        className="p-1 hover:bg-gray-100 rounded"
+                        disabled={!item.inStock} //  Disable if out of stock
+                      >
+                        <Minus className={`w-4 h-4 ${!item.inStock ? 'text-gray-300' : ''}`} />
+                      </button>
+                      <span className="w-8 text-center">{item.quantity}</span>
+                      <button
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        className="p-1 hover:bg-gray-100 rounded"
+                        disabled={!item.inStock} //  Disable if out of stock
+                      >
+                        <Plus className={`w-4 h-4 ${!item.inStock ? 'text-gray-300' : ''}`} />
+                      </button>
+                      <button
+                        onClick={() => removeFromCart(item.id)}
+                        className="ml-auto text-red-600 text-sm hover:underline"
+                      >
+                        Remove
+                      </button>
+                    </div>
                   </div>
                 </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {cart.length > 0 && (
+          <div className="border-t p-4">
+            <div className="flex justify-between mb-4">
+              <span className="font-semibold">Subtotal:</span>
+              <span className="font-bold text-lg">${cartTotal.toFixed(2)}</span>
+            </div>
+            
+            {/*  Show warning message */}
+            {hasOutOfStockItems && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                <p className="text-sm text-red-700">
+                  ⚠️ Remove out of stock items to proceed
+                </p>
               </div>
-            ))}
+            )}
+            
+            <div className="text-sm text-gray-500 mb-4">
+              Shipping calculated at checkout
+            </div>
+            
+            <button
+              onClick={handleCheckout}
+              disabled={hasOutOfStockItems} 
+              className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
+                hasOutOfStockItems
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+              }`}
+            >
+              {hasOutOfStockItems ? 'Remove Out of Stock Items' : 'Proceed to Checkout'}
+            </button>
           </div>
         )}
-      </div>
-
-      {cart.length > 0 && (
-        <div className="border-t p-4">
-          <div className="flex justify-between mb-4">
-            <span className="font-semibold">Subtotal:</span>
-            <span className="font-bold text-lg">${cartTotal.toFixed(2)}</span>
-          </div>
-          <div className="text-sm text-gray-500 mb-4">
-            Shipping calculated at checkout
-          </div>
-          <button
-            onClick={handleCheckout}
-            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-          >
-            Proceed to Checkout
-          </button>
-        </div>
-      )}
-    </>
-  );
+      </>
+    );
+  };
 
   const renderCheckoutView = () => (
     <form onSubmit={handlePlaceOrder} className="flex-1 overflow-y-auto p-6">
@@ -246,7 +321,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
       <div className="mb-6">
         <h4 className="font-medium mb-3">Shipping Information</h4>
         <div className="space-y-3">
-          {/* Full Name - with id and name */}
+          {/* Full Name */}
           <div>
             <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
               Full Name *
@@ -269,7 +344,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
             )}
           </div>
 
-          {/* Email - with id and name */}
+          {/* Email */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               Email *
@@ -292,7 +367,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
             )}
           </div>
 
-          {/* Phone - with id and name (FIXED: was missing before) */}
+          {/* Phone */}
           <div>
             <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
               Phone Number
@@ -310,7 +385,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
             <p className="text-xs text-gray-500 mt-1">For delivery updates (optional)</p>
           </div>
 
-          {/* Address - with id and name */}
+          {/* Address */}
           <div>
             <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
               Address *
@@ -325,7 +400,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
               className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 errors.address ? 'border-red-500' : 'border-gray-300'
               }`}
-              placeholder="Adress"
+              placeholder="Address"
               required
             />
             {errors.address && (
@@ -335,7 +410,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
 
           {/* City and ZIP Code */}
           <div className="grid grid-cols-2 gap-3">
-            {/* City - with id and name */}
+            {/* City */}
             <div>
               <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
                 City *
@@ -350,7 +425,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                 className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   errors.city ? 'border-red-500' : 'border-gray-300'
                 }`}
-                placeholder="city"
+                placeholder="City"
                 required
               />
               {errors.city && (
@@ -358,7 +433,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
               )}
             </div>
             
-            {/* ZIP Code - with id and name */}
+            {/* ZIP Code */}
             <div>
               <label htmlFor="zipCode" className="block text-sm font-medium text-gray-700 mb-1">
                 ZIP Code *
@@ -391,7 +466,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
           Payment Information
         </h4>
         <div className="space-y-3">
-          {/* Card Number - with id and name */}
+          {/* Card Number */}
           <div>
             <label htmlFor="cardNumber" className="block text-sm font-medium text-gray-700 mb-1">
               Card Number *
@@ -410,7 +485,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
               className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 errors.cardNumber ? 'border-red-500' : 'border-gray-300'
               }`}
-              placeholder="123 4567 7899 0098"
+              placeholder="1234 5678 9012 3456"
               required
             />
             {errors.cardNumber && (
@@ -423,7 +498,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
 
           {/* Expiry and CVV */}
           <div className="grid grid-cols-2 gap-3">
-            {/* Expiry - with id and name */}
+            {/* Expiry */}
             <div>
               <label htmlFor="expiry" className="block text-sm font-medium text-gray-700 mb-1">
                 Expiry (MM/YY) *
@@ -442,7 +517,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                 className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   errors.expiry ? 'border-red-500' : 'border-gray-300'
                 }`}
-                placeholder="12/25"
+                placeholder="MM/YY"
                 required
               />
               {errors.expiry && (
@@ -453,7 +528,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
               )}
             </div>
             
-            {/* CVV - with id and name */}
+            {/* CVV */}
             <div>
               <label htmlFor="cvv" className="block text-sm font-medium text-gray-700 mb-1">
                 CVV *

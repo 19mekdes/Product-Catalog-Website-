@@ -1,6 +1,4 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
-
 
 interface Product {
   id: number;
@@ -25,22 +23,20 @@ interface CartContextType {
   clearCart: () => void;
   cartCount: number;
   cartTotal: number;
+  isProductInStock: (productId: number) => boolean; // Added this function
 }
-
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const CartContext = createContext<CartContextType | undefined>(undefined);
 
-
 // eslint-disable-next-line react-refresh/only-export-components
-export const useCart = () => {
+export function useCart() {
   const context = useContext(CartContext);
   if (context === undefined) {
     throw new Error('useCart must be used within a CartProvider');
   }
   return context;
-};
-
+}
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [cart, setCart] = useState<CartItem[]>(() => {
@@ -48,11 +44,52 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return savedCart ? JSON.parse(savedCart) : [];
   });
 
+  // Import products to check stock status
+  const [products, setProducts] = useState<Product[]>([]);
+
+  // Load products data
+  useEffect(() => {
+    import('../data/products').then(module => {
+      setProducts(module.products);
+    });
+  }, []);
+
+  // Save cart to localStorage
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
+  // Check if product is in stock
+  const isProductInStock = (productId: number): boolean => {
+    const product = products.find(p => p.id === productId);
+    return product ? product.inStock : false;
+  };
+
+  useEffect(() => {
+    if (products.length > 0) {
+      // Check for out of stock items in cart
+      const updatedCart = cart.filter(item => {
+        const product = products.find(p => p.id === item.id);
+        return product ? product.inStock : false;
+      });
+
+      
+      if (updatedCart.length < cart.length) {
+        setCart(updatedCart);
+        
+        alert('Some items were removed from your cart as they are no longer in stock.');
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [products]); 
+
   const addToCart = (product: Product) => {
+    //  CRITICAL FIX: Check if product is in stock
+    if (!product.inStock) {
+      alert(' Sorry, this item is currently out of stock and cannot be added to your cart.');
+      return; 
+    }
+
     setCart(prevCart => {
       const existingItem = prevCart.find(item => item.id === product.id);
       if (existingItem) {
@@ -71,10 +108,20 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const updateQuantity = (productId: number, quantity: number) => {
+    //  Check if trying to add quantity to out of stock item
+    if (quantity > 0) {
+      const productInCart = cart.find(item => item.id === productId);
+      if (productInCart && !productInCart.inStock) {
+        alert('⚠️ Cannot update quantity for out of stock items. Please remove it from cart.');
+        return;
+      }
+    }
+
     if (quantity < 1) {
       removeFromCart(productId);
       return;
     }
+    
     setCart(prevCart =>
       prevCart.map(item =>
         item.id === productId ? { ...item, quantity } : item
@@ -96,7 +143,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     updateQuantity,
     clearCart,
     cartCount,
-    cartTotal
+    cartTotal,
+    isProductInStock // Expose this function to components
   };
 
   return (

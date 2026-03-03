@@ -35,17 +35,23 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange }) =>
         <h4 className="text-sm font-medium text-gray-700 mb-2">Category</h4>
         <div className="space-y-2">
           {categories.map(category => (
-            <label key={category} className="flex items-center">
+            <div key={category} className="flex items-center">
               <input
                 type="radio"
-                name="category"
+                id={`category-${category}`}       
+                name="category"                     
                 value={category}
                 checked={filters.category === category || (category === 'All' && !filters.category)}
                 onChange={() => handleCategoryChange(category)}
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
               />
-              <span className="ml-2 text-sm text-gray-600">{category}</span>
-            </label>
+              <label 
+                htmlFor={`category-${category}`}    
+                className="ml-2 text-sm text-gray-600 cursor-pointer"
+              >
+                {category}
+              </label>
+            </div>
           ))}
         </div>
       </div>
@@ -53,6 +59,8 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange }) =>
       <div>
         <h4 className="text-sm font-medium text-gray-700 mb-2">Sort By</h4>
         <select
+          id="sort-select"                          
+          name="sortBy"                             
           value={filters.sortBy}
           onChange={(e) => handleSortChange(e.target.value as SortOption)}
           className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
