@@ -84,7 +84,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [products]); 
 
   const addToCart = (product: Product) => {
-    //  CRITICAL FIX: Check if product is in stock
+    
     if (!product.inStock) {
       alert(' Sorry, this item is currently out of stock and cannot be added to your cart.');
       return; 
