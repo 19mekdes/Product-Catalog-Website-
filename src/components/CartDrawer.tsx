@@ -360,7 +360,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
               className={`w-full px-4 py-2.5 bg-white border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow ${
                 errors.fullName ? 'border-red-500 ring-red-200' : 'border-gray-200'
               }`}
-              placeholder="John Doe"
+              placeholder="Name"
               required
             />
             {errors.fullName && (
@@ -383,7 +383,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
               className={`w-full px-4 py-2.5 bg-white border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 errors.email ? 'border-red-500' : 'border-gray-200'
               }`}
-              placeholder="john@example.com"
+              placeholder="Email Address"
               required
             />
             {errors.email && (
@@ -404,7 +404,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
               onChange={handleInputChange}
               autoComplete="tel"
               className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="(555) 555-5555"
+              placeholder="2519678542"
             />
             <p className="text-xs text-gray-400 mt-1 ml-1">For delivery updates (optional)</p>
           </div>
@@ -449,7 +449,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                 className={`w-full px-4 py-2.5 bg-white border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   errors.city ? 'border-red-500' : 'border-gray-200'
                 }`}
-                placeholder="New York"
+                placeholder="Addis Abeba"
                 required
               />
               {errors.city && (
