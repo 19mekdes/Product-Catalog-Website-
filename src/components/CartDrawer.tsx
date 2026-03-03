@@ -46,7 +46,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
     return cart.every(item => item.inStock === true);
   };
 
-  // Get out of stock items
+  
   const getOutOfStockItems = () => {
     return cart.filter(item => !item.inStock);
   };
@@ -101,7 +101,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
     if (!areAllItemsInStock()) {
       const outOfStockItems = getOutOfStockItems();
       alert(`❌ Cannot proceed to checkout. The following items are out of stock:\n\n${outOfStockItems.map(item => `• ${item.name}`).join('\n')}\n\nPlease remove them from your cart.`);
-      return; // Don't proceed to checkout
+      return; 
     }
     
     setCheckoutStep('checkout');
@@ -110,7 +110,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
   const handlePlaceOrder = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Double-check stock before placing order
+    
     if (!areAllItemsInStock()) {
       alert('❌ Some items in your cart are no longer in stock. Please go back and remove them.');
       return;

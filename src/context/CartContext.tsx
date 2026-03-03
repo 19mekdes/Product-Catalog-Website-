@@ -44,7 +44,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return savedCart ? JSON.parse(savedCart) : [];
   });
 
-  // Import products to check stock status
+  
   const [products, setProducts] = useState<Product[]>([]);
 
   // Load products data
@@ -108,7 +108,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const updateQuantity = (productId: number, quantity: number) => {
-    //  Check if trying to add quantity to out of stock item
+    
     if (quantity > 0) {
       const productInCart = cart.find(item => item.id === productId);
       if (productInCart && !productInCart.inStock) {

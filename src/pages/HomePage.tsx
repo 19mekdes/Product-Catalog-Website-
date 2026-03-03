@@ -28,7 +28,7 @@ const HomePage: React.FC = () => {
       );
     }
 
-    // Sort products
+    
     switch (filters.sortBy) {
       case 'price-asc':
         filtered.sort((a, b) => a.price - b.price);
