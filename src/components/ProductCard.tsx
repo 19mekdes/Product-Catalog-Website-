@@ -47,7 +47,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
             <span className="ml-1 text-sm text-gray-600">{product.rating}</span>
           </div>
-          <span className="mx-2 text-gray-300">|</span>
+          <span className="mx-2 texqt-gray-300">|</span>
           <span className="text-lg font-bold text-gray-900">${product.price}</span>
         </div>
         

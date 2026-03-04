@@ -9,7 +9,12 @@ import ProductDetailsPage from './pages/ProductDetailsPage';
 
 function App() {
   return (
-    <Router>
+    <Router
+    future={{
+        v7_relativeSplatPath: true,  
+        v7_startTransition: true,     
+      }}
+    >
 
       <CartProvider>
         <div className="min-h-screen bg-gray-50 flex flex-col">
