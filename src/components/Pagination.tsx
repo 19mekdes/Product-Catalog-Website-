@@ -12,64 +12,64 @@ const Pagination: React.FC<PaginationProps> = ({
   totalPages, 
   onPageChange 
 }) => {
-  // Generate page numbers to show
-  const getPageNumbers = () => {
-    const pages = [];
-    const maxVisible = 5; // Show 5 page numbers at a time
-    
-    let start = Math.max(1, currentPage - 2);
-    const end = Math.min(totalPages, start + maxVisible - 1);
-    
-    if (end - start + 1 < maxVisible) {
-      start = Math.max(1, end - maxVisible + 1);
-    }
-    
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
-    }
-    
-    return pages;
-  };
+  // For 12 products with 8 per page, we only need 2 pages
+  // Page 1: Products 1-8
+  // Page 2: Products 9-12
 
   if (totalPages <= 1) return null;
 
   return (
-    <div className="flex items-center justify-center gap-2 mt-8">
+    <nav className="flex items-center justify-center gap-2 mt-8" aria-label="Pagination">
       {/* Previous Button */}
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="inline-flex items-center px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         aria-label="Previous page"
       >
-        <ChevronLeft className="w-5 h-5" />
+        <ChevronLeft className="w-4 h-4" />
+        <span className="ml-1 hidden sm:inline">Previous</span>
       </button>
 
-      {/* Page Numbers */}
-      {getPageNumbers().map(pageNum => (
+      {/* Page 1 Button */}
+      <button
+        onClick={() => onPageChange(1)}
+        className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+          currentPage === 1
+            ? 'bg-blue-600 text-white hover:bg-blue-700'
+            : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+        }`}
+        aria-current={currentPage === 1 ? 'page' : undefined}
+      >
+        1
+      </button>
+
+      {/* Page 2 Button - Only show if there are 2 pages */}
+      {totalPages >= 2 && (
         <button
-          key={pageNum}
-          onClick={() => onPageChange(pageNum)}
-          className={`px-4 py-2 rounded-lg transition-colors ${
-            currentPage === pageNum
-              ? 'bg-blue-600 text-white'
-              : 'border border-gray-300 hover:bg-gray-50'
+          onClick={() => onPageChange(2)}
+          className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            currentPage === 2
+              ? 'bg-blue-600 text-white hover:bg-blue-700'
+              : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
           }`}
+          aria-current={currentPage === 2 ? 'page' : undefined}
         >
-          {pageNum}
+          2
         </button>
-      ))}
+      )}
 
       {/* Next Button */}
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="inline-flex items-center px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         aria-label="Next page"
       >
-        <ChevronRight className="w-5 h-5" />
+        <span className="mr-1 hidden sm:inline">Next</span>
+        <ChevronRight className="w-4 h-4" />
       </button>
-    </div>
+    </nav>
   );
 };
 
